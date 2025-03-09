@@ -25,6 +25,7 @@ export default function ChessBoard() {
                     <BoardSquare
                         key={`${rowIndex}-${colIndex}`}
                         piece={piece}
+                        isWhite={(rowIndex + colIndex) % 2 === 0}
                     />
                 ))
             ))}
