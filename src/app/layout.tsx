@@ -17,7 +17,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <body
-      className={`${pfDisplay.className} flex antialiased bg-bg-dark font-bold text-fg`}
+      className={`${pfDisplay.className} flex antialiased bg-bg-dark font-bold text-fg max-h-screen`}
       >
         <Sidebar />
         {children}
