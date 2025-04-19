@@ -46,9 +46,13 @@ export function handleMove(from: string, to: string) {
     move(from, to);
 }
 
-function move(from: string, to: string) {
+export function move(from: string, to: string, promotion?: string) {
+  const tempMove: { from: string; to: string; promotion?: string } = { from, to };
+  if (promotion) {
+    tempMove.promotion = promotion;
+  }
   try {
-    chess.move({ from, to });
+    chess.move(tempMove);
     updateGame();
   } catch {
     // Silently ignore invalid moves
