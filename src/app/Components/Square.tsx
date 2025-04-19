@@ -12,6 +12,7 @@ export default function Square({ children, isWhite }: { children: ReactNode, isW
         src={bgImage}
         alt={isWhite ? "Light wood tile" : "Dark wood tile"}
         fill
+        sizes="(max-width: 768px) 12.5vw, 80px"
         className="object-cover"
       />
       {children}

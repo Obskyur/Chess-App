@@ -26,6 +26,7 @@ export default function Piece({ piece, pos }: { piece: BoardSquareType, pos: str
           src={pieceImage}
           alt={`${color === "w" ? "White" : "Black"} ${type}`}
           fill
+          sizes="(max-width: 768px) 40px, 60px"
           className={`object-contain ${isDragging ? 'opacity-0' : ''}`}
         />
       </div>
