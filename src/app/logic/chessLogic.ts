@@ -11,6 +11,15 @@ export const gameSubject = new BehaviorSubject({
   history: chess.history(),
 });
 
-export function move(from, to) {
-  
+export function move(from: string, to: string) {
+  const legalMove = chess.move({ from, to });
+  if (legalMove) {
+    gameSubject.next({
+      board: chess.board(),
+      gameOver: chess.isGameOver(),
+      gameState: chess.turn(),
+      fen: chess.fen(),
+      history: chess.history(),
+    });
+  }
 }

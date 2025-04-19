@@ -11,9 +11,7 @@ export default function BoardSquare({ piece, isWhite, pos }: { piece: BoardSquar
     accept: 'piece',
     drop: (item: { piece: BoardSquareType }) => {
       const fromPos = item?.piece?.square;
-      console.log('Dropped piece:', item.piece);
       move(fromPos, pos);
-      console.log('Target square:', pos);
     },
     collect: (monitor) => ({
       isOver: monitor.isOver(),

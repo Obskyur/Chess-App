@@ -5,12 +5,12 @@ import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { gameSubject } from '@/app/logic/chessLogic';
 import MovesBar from '@/app/components/MovesBar';
-import { BoardSquare } from '@/app/types/BoardSquareType';
+import { BoardSquareType } from '@/app/types/BoardSquareType';
 import ChessBoard from '@/app/components/ChessBoard';
 
 
 export default function Play() {
-    const [ board, setBoard ] = useState<BoardSquare[][]>([]);
+    const [ board, setBoard ] = useState<BoardSquareType[][]>([]);
     
     useEffect(() => {
         const subscription = gameSubject.subscribe(game => setBoard(game.board));
