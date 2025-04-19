@@ -34,7 +34,7 @@ export default function BoardSquare({ piece, isWhite, pos }: { piece: BoardSquar
     });
 
     return () => subscribe.unsubscribe();
-  }, [])
+  })
 
   return ( 
     <div className="w-full h-full" ref={drop}>
@@ -42,5 +42,5 @@ export default function BoardSquare({ piece, isWhite, pos }: { piece: BoardSquar
         {promo ? (<Promote promo={promo} />) : piece ? (<Piece piece={piece} pos={pos} />) : null}
       </Square>
     </div>
-   );
+  );
 }
