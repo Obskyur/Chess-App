@@ -66,7 +66,37 @@ class ChessGameManager {
     }
   }
 
+  private isLocalStorageAvailable(): boolean {
+    try {
+      const test = '__storage_test__';
+      localStorage.setItem(test, test);
+      localStorage.removeItem(test);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  private saveGameToStorage(fen: string): void {
+    if (this.isLocalStorageAvailable()) {
+      localStorage.setItem('chessGame', fen);
+    }
+  }
+
+  private loadGameFromStorage(): string | null {
+    if (this.isLocalStorageAvailable()) {
+      return localStorage.getItem('chessGame');
+    }
+    return null;
+  }
+
   private createInitialGameState(): GameState {
+    const savedGame = this.loadGameFromStorage();
+
+    if (savedGame) {
+      this.chess.load(savedGame);
+    }
+    
     return {
       board: this.chess.board(),
       gameOver: false,
@@ -108,6 +138,7 @@ class ChessGameManager {
       pendingPromo,
     };
 
+    this.saveGameToStorage(this.chess.fen());
     this.gameSubject.next(newGameState);
   }
 
