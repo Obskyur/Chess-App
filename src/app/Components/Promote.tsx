@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import Square from '@/app/components/Square';
+import Square from '@/app/components/ui/Square';
 import { move } from '@/logic/chessLogic';
 
 const promotionPieces = 'rnbq'

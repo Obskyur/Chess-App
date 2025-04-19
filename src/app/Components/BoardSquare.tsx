@@ -3,7 +3,7 @@
 import { BoardSquareType } from '../../types/BoardSquareType';
 import { useDrop } from 'react-dnd';
 import { useEffect, useState } from 'react';
-import Square from './Square';
+import Square from '@/app/components/ui/Square';
 import Piece from './Piece';
 import { handleMove } from '@/logic/chessLogic';
 import { gameSubject } from '@/logic/chessLogic';

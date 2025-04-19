@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import logo from '../../../public/images/Logo.png';
-import NavButton from '@/app/components/NavButton';
-import CollapseButton from '@/app/components/CollapseButton';
+import NavButton from '@/app/components/ui/NavButton';
+import CollapseButton from '@/app/components/ui/CollapseButton';
 
 export default function Sidebar() {
     const [isOpen, setIsOpen] = useState(true);
