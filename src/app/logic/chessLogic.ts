@@ -24,17 +24,7 @@ export const gameSubject = new BehaviorSubject<{
 
 export function initGame() {
   chess.reset();
-  const newGameState = {
-    board: chess.board(),
-    gameOver: false,
-    result: null,
-    gameState: 'white',
-    fen: chess.fen(),
-    history: chess.history(),
-    pendingPromo: null,
-  }
-
-  gameSubject.next(newGameState);
+  updateGame();
 }
 
 export function handleMove(from: string, to: string) {
@@ -60,6 +50,11 @@ export function move(from: string, to: string, promotion?: string) {
   } catch {
     // Silently ignore invalid moves
   }
+}
+
+export function resetGame() {
+  chess.reset();
+  updateGame();
 }
 
 function updateGame(pendingPromo: { from: string, to: string, color: string } | null = null) {
