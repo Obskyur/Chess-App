@@ -1,18 +1,31 @@
-import { Piece } from '../logic/chessLogic';
-import Image from 'next/image';
-import { pieceImages } from '../logic/pieceImages';
+'use client';
 
-interface BoardSquareProps {
-    piece: Piece;
-    isWhite: boolean;
-}
+import { BoardSquareType } from '../types/BoardSquareType';
+import { useDrop } from 'react-dnd';
+import Square from './Square';
+import Piece from './Piece';
+import { move } from '@/app/logic/chessLogic';
 
-export default function BoardSquare({ piece, isWhite }: BoardSquareProps) {
-    const pieceImage = piece ? pieceImages[piece] : '';
-    return (
-        <div className={`w-full h-full ${isWhite ? 'bg-gray-300' : 'bg-gray-500'}`}>
-            
-            {pieceImage && <Image src={pieceImage} alt={piece} width='110' height='110' />}
-        </div>
-    );
+export default function BoardSquare({ piece, isWhite, pos }: { piece: BoardSquareType, isWhite: boolean, pos: string }) {
+  const [ , drop ] = useDrop({
+    accept: 'piece',
+    drop: (item: { piece: BoardSquareType }) => {
+      const fromPos = item?.piece?.square;
+      console.log('Dropped piece:', item.piece);
+      move(fromPos, pos);
+      console.log('Target square:', pos);
+    },
+    collect: (monitor) => ({
+      isOver: monitor.isOver(),
+      canDrop: monitor.canDrop(),
+    }),
+  });
+
+  return ( 
+    <div className="w-full h-full" ref={drop}>
+      <Square isWhite={isWhite}>
+        {piece && <Piece piece={piece} pos={pos} />}
+      </Square>
+    </div>
+   );
 }

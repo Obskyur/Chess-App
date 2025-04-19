@@ -1,34 +1,35 @@
 'use client'
 
-import { Board } from '../logic/chessLogic';
-import { useState } from 'react';
+import { BoardSquareType } from '@/app/types/BoardSquareType';
 import BoardSquare from './BoardSquare';
 
-const initialBoard: Board = [
-    ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
-    ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
-    ['', '', '', '', '', '', '', ''],
-    ['', '', '', '', '', '', '', ''],
-    ['', '', '', '', '', '', '', ''],
-    ['', '', '', '', '', '', '', ''],
-    ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
-    ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R']
-];
+export default function ChessBoard({ board }: { board: BoardSquareType[][] }) {
+    function isWhite(i: number) {
+        const { x, y } = getPos(i);
+        return (x + y) % 2 === 0;
+    }
+    
+    function getPos(i: number) {
+        const x = i % 8;
+        const y = Math.abs(Math.floor(i / 8) - 7);
+        return { x, y };
+    }
 
-export default function ChessBoard() {
-    const [board, setBoard] = useState<Board>(initialBoard);
+    function getPosInChessNotation(i: number) {
+        const { x, y } = getPos(i);
+        const letter = 'abcdefgh'[x];
+        return `${letter}${y + 1}`;
+    }
 
     return (
-        <div className="grid grid-cols-8 grid-rows-8 items-center justify-center h-screen mx-7 my-18">
-            {board.map((row, rowIndex) => (
-                row.map((piece, colIndex) => (
-                    <BoardSquare
-                        key={`${rowIndex}-${colIndex}`}
-                        piece={piece}
-                        isWhite={(rowIndex + colIndex) % 2 === 0}
-                    />
-                ))
-            ))}
+        <div className="w-[min(100vw,80vh)] aspect-square mx-auto">
+            <div className="grid grid-cols-8 w-full h-full">
+                {board.flat().map((piece, i) => 
+                    <div key={i} className="relative w-full aspect-square">
+                        <BoardSquare isWhite={isWhite(i)} piece={piece} pos={getPosInChessNotation(i)} />
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
