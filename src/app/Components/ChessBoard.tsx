@@ -1,6 +1,6 @@
 'use client'
 
-import { BoardSquareType } from '@/app/types/BoardSquareType';
+import { BoardSquareType } from '@/types/BoardSquareType';
 import BoardSquare from './BoardSquare';
 
 export default function ChessBoard({ board }: { board: BoardSquareType[][] }) {

@@ -1,7 +1,5 @@
-export default function Page({ children }: Readonly<{ children: React.ReactNode; }>) {
-  return (
-    <div>
-      {children}
-    </div>
-  );
+import { redirect } from 'next/navigation';
+
+export default function Page() {
+  redirect('/play');
 }

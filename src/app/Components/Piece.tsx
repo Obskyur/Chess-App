@@ -1,10 +1,10 @@
 'use client';
 
 import Image from 'next/image';
-import { BoardSquareType } from '../types/BoardSquareType';
+import { BoardSquareType } from '../../types/BoardSquareType';
 import { useDrag } from 'react-dnd';
 import { useEffect, useState } from 'react';
-import { gameSubject } from '../logic/chessLogic';
+import { gameSubject } from '../../logic/chessLogic';
 
 export default function Piece({ piece }: { piece: BoardSquareType }) {
     const [canDrag, setCanDrag] = useState(true);

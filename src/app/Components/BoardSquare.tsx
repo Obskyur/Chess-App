@@ -1,12 +1,12 @@
 'use client';
 
-import { BoardSquareType } from '../types/BoardSquareType';
+import { BoardSquareType } from '../../types/BoardSquareType';
 import { useDrop } from 'react-dnd';
 import { useEffect, useState } from 'react';
 import Square from './Square';
 import Piece from './Piece';
-import { handleMove } from '@/app/logic/chessLogic';
-import { gameSubject } from '@/app/logic/chessLogic';
+import { handleMove } from '@/logic/chessLogic';
+import { gameSubject } from '@/logic/chessLogic';
 import Promote from './Promote';
 
 export default function BoardSquare({ piece, isWhite, pos }: { piece: BoardSquareType, isWhite: boolean, pos: string }) {

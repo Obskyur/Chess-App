@@ -3,9 +3,9 @@
 import { useEffect, useState } from 'react';
 import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { gameSubject, resetGame } from '@/app/logic/chessLogic';
+import { gameSubject, resetGame } from '@/logic/chessLogic';
 import MovesBar from '@/app/components/MovesBar';
-import { BoardSquareType } from '@/app/types/BoardSquareType';
+import { BoardSquareType } from '@/types/BoardSquareType';
 import ChessBoard from '@/app/components/ChessBoard';
 
 
@@ -13,20 +13,18 @@ export default function Play() {
     const [board, setBoard] = useState<BoardSquareType[][]>([]);
     const [isGameOver, setIsGameOver] = useState(false);
     const [result, setResult] = useState<string | null>(null);
+    const [moves, setMoves] = useState<string[]>([]);
     
     useEffect(() => {
         const subscription = gameSubject.subscribe(game => {
             setBoard(game.board);
+            setMoves(game.history);
             setIsGameOver(game.gameOver);
             setResult(game.result);
         })
 
         return () => subscription.unsubscribe();;
     }, []);
-
-    const moves = [
-        'pe4', 'pe5', 'nf3', 'nc6', 'bb5', 'na5', 'bxd7'
-    ]
 
     return (
         <DndProvider backend={HTML5Backend}>
