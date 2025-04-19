@@ -7,6 +7,7 @@ const chess = new Chess();
 export const gameSubject = new BehaviorSubject<{
   board: ({ square: Square; type: PieceSymbol; color: Color } | null)[][];
   gameOver: boolean;
+  result: string | null;
   gameState: string;
   fen: string;
   history: string[];
@@ -14,6 +15,7 @@ export const gameSubject = new BehaviorSubject<{
 }>({
   board: chess.board(),
   gameOver: false,
+  result: null,
   gameState: 'white',
   fen: chess.fen(),
   history: chess.history(),
@@ -25,6 +27,7 @@ export function initGame() {
   const newGameState = {
     board: chess.board(),
     gameOver: false,
+    result: null,
     gameState: 'white',
     fen: chess.fen(),
     history: chess.history(),
@@ -63,6 +66,7 @@ function updateGame(pendingPromo: { from: string, to: string, color: string } | 
   const newGameState = {
     board: chess.board(),
     gameOver: chess.isGameOver(),
+    result: chess.isGameOver() ? getGameResult() : null,
     gameState: chess.turn(),
     fen: chess.fen(),
     history: chess.history(),
@@ -70,4 +74,15 @@ function updateGame(pendingPromo: { from: string, to: string, color: string } | 
   }
 
   gameSubject.next(newGameState);
+}
+
+function getGameResult() {
+  if (chess.isCheckmate())
+    return chess.turn() === 'w' ? 'Winner - Black' : 'Winner - White';
+  if (chess.isDraw()) {
+    return `Draw: (${chess.isThreefoldRepetition() ? 'threefold repetition' :
+      chess.isInsufficientMaterial() ? 'insufficient material' :
+      chess.isStalemate() ? 'stalemate' : '50 moves rule'})`;
+  }
+  return null;
 }
