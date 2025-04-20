@@ -4,10 +4,11 @@ import { useEffect, useState } from 'react';
 import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { gameSubject, resetGame } from '@/logic/chessLogic';
-import MovesBar from '@/app/components/MovesBar';
 import { BoardSquareType } from '@/types/BoardSquareType';
+import { auth, db } from '@/lib/firebase';
+import { collection, addDoc } from 'firebase/firestore';
 import ChessBoard from '@/app/components/ChessBoard';
-
+import MovesBar from '@/app/components/MovesBar';
 
 export default function Play() {
     const [board, setBoard] = useState<BoardSquareType[][]>([]);
@@ -26,6 +27,31 @@ export default function Play() {
         return () => subscription.unsubscribe();;
     }, []);
 
+    async function startOnlineGame() {
+        resetGame();
+        const member = {
+            uid: auth.currentUser?.uid,
+            piece: Math.random() < 0.5 ? 'b' : 'w',
+            name: auth.currentUser?.displayName,
+            creator: true
+        }
+        const game = {
+            status: 'waiting',
+            members: [member],
+            board: gameSubject.getValue().fen,
+            history: gameSubject.getValue().history,
+        };
+
+        const gamesCollection = collection(db, 'games');
+        addDoc(gamesCollection, game)
+            .then(docRef => {
+                console.log('Game created with ID:', docRef.id);
+            })
+            .catch((error) => {
+                console.error('Error creating game:', error);
+        });
+    }
+
     return (
         <DndProvider backend={HTML5Backend}>
             <div className="flex items-center justify-center w-full">
@@ -37,7 +63,8 @@ export default function Play() {
                         </div>
                     </div>
                 )}
-                <div className="flex justify-center items-center w-full h-full">
+                <div className="flex flex-col justify-center items-center w-full h-full">
+                    <button className="top-4 left-4 px-4 py-2 bg-blue-500 text-white rounded cursor-pointer" onClick={startOnlineGame}>Start Online Game</button>
                     <ChessBoard board={board} />
                 </div>
                 <MovesBar moves={moves} />

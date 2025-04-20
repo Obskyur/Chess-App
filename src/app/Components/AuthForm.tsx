@@ -1,12 +1,13 @@
 import { useState } from "react"
 import { auth } from "@/lib/firebase"
-import { signInWithPhoneNumber, PhoneAuthProvider, signInWithCredential } from "firebase/auth"
+import { signInWithPhoneNumber, PhoneAuthProvider, signInWithCredential, updateProfile } from "firebase/auth"
 import { useRecaptcha } from "@/hooks/useRecaptcha"
 import PhoneNumberForm from "@/app/components/PhoneNumberForm"
 import VerificationForm from "@/app/components/VerificationForm"
 
 interface AuthState {
   phoneNumber: string
+  displayName?: string
   verificationCode: string
   verificationId: string
   loading: boolean
@@ -30,23 +31,27 @@ export default function AuthForm() {
     setAuthState(prev => ({ ...prev, ...updates }))
   }
 
-  const validatePhoneNumber = async (phoneNumber: string): Promise<boolean> => {
+  const validatePhoneNumber = async (phoneNumber: string): Promise<{isValid: boolean, displayName?: string}> => {
     try {
       const response = await fetch('/api/auth/validate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phoneNumber })
       })
-      return response.ok
+      const data = await response.json()
+      return { 
+        isValid: response.ok,
+        displayName: data.displayName 
+      }
     } catch {
-      return false
+      return { isValid: false }
     }
   }
 
   const handlePhoneSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault()
     
-    const isValid = await validatePhoneNumber(authState.phoneNumber)
+    const { isValid, displayName } = await validatePhoneNumber(authState.phoneNumber)
     if (!isValid) {
       updateAuthState({ error: "You're not my mom! 😠" })
       return
@@ -58,7 +63,10 @@ export default function AuthForm() {
         authState.phoneNumber,
         window.recaptchaVerifier
       )
-      updateAuthState({ verificationId: result.verificationId })
+      updateAuthState({ 
+        verificationId: result.verificationId,
+        displayName 
+      })
     })
   }
 
@@ -69,7 +77,15 @@ export default function AuthForm() {
         authState.verificationId, 
         authState.verificationCode
       )
-      await signInWithCredential(auth, credential)
+      const userCredential = await signInWithCredential(auth, credential)
+      
+      if (userCredential.user && authState.displayName) {
+        if (userCredential.user && authState.displayName) {
+          await updateProfile(userCredential.user, {
+            displayName: authState.displayName
+          })
+        }
+      }
     })
   }
 
