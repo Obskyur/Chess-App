@@ -17,8 +17,8 @@ export default function ChessBoard({ board, perspective }: { board: BoardSquareT
     }
     
     function getPos(i: number) {
-        const x = i % 8;
-        const y = Math.abs(Math.floor(i / 8) - 7);
+        const x = perspective === 'w' ? i % 8 : Math.abs(i % 8 - 7);
+        const y = perspective === 'w' ? Math.abs(Math.floor(i / 8) - 7) : Math.floor(i / 8);
         return { x, y };
     }
 

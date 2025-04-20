@@ -1,5 +1,7 @@
 import { Chess, Square, PieceSymbol, Color } from 'chess.js';
 import { BehaviorSubject } from 'rxjs';
+import { Firestore, DocumentReference, DocumentData, collection, addDoc } from 'firebase/firestore';
+import { Auth } from 'firebase/auth';
 
 interface ChessMove {
   from: string;
@@ -26,6 +28,7 @@ interface GameState {
 class ChessGameManager {
   private chess: Chess;
   private gameSubject: BehaviorSubject<GameState>;
+  private dbGameRef: DocumentReference<DocumentData> | null = null;
 
   constructor() {
     this.chess = new Chess();
@@ -41,8 +44,38 @@ class ChessGameManager {
     this.updateGameState();
   }
 
+  public async startOnlineGame(auth: Auth, db: Firestore): Promise<'w' | 'b'> {
+    this.startNewGame();
+    const member = {
+      uid: auth.currentUser?.uid,
+      piece: Math.random() < 0.5 ? 'b' : 'w',
+      name: auth.currentUser?.displayName,
+      creator: true
+    };
+    
+    const game = {
+      status: 'waiting',
+      members: [member],
+      board: this.gameSubject.getValue().fen,
+      history: this.gameSubject.getValue().history,
+    };
+
+    try {
+      const gamesCollection = collection(db, 'games');
+      const docRef = await addDoc(gamesCollection, game);
+      this.dbGameRef = docRef;
+      console.log('Game created with ID:', docRef.id);
+    } catch (error) {
+      console.error('Error creating game:', error);
+      throw error;
+    }
+    return member.piece as 'w' | 'b';
+  }
+
   public attemptMove(from: string, to: string): void {
     const pendingPromotion = this.checkForPawnPromotion(from, to);
+
+    console.log('Move:', from, to);
     
     if (pendingPromotion) {
       this.updateGameState(pendingPromotion);
@@ -162,7 +195,7 @@ class ChessGameManager {
     };
 
     const reason = Object.entries(reasons)
-      .find(([_, value]) => value)?.[0] ?? '50 moves rule';
+      .find(([ , value]) => value)?.[0] ?? '50 moves rule';
 
     return `Draw: (${reason})`;
   }
@@ -171,8 +204,8 @@ class ChessGameManager {
 // Export instance and methods
 const chessManager = new ChessGameManager();
 export const gameSubject = chessManager.getGameSubject();
-export const initGame = () => chessManager.startNewGame();
+export const resetGame = () => chessManager.startNewGame();
 export const handleMove = (from: string, to: string) => chessManager.attemptMove(from, to);
 export const move = (from: string, to: string, promotion?: string) => 
   chessManager.executeMove({ from, to, promotion });
-export const resetGame = initGame;
+export const startOnlineGame = (auth: Auth, db: Firestore) => chessManager.startOnlineGame(auth, db);

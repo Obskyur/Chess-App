@@ -3,10 +3,9 @@
 import { useEffect, useState } from 'react';
 import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { gameSubject, resetGame } from '@/logic/chessLogic';
+import { gameSubject, startOnlineGame } from '@/logic/chessLogic';
 import { BoardSquareType } from '@/types/BoardSquareType';
 import { auth, db } from '@/lib/firebase';
-import { collection, addDoc } from 'firebase/firestore';
 import ChessBoard from '@/app/components/ChessBoard';
 import MovesBar from '@/app/components/MovesBar';
 
@@ -29,29 +28,12 @@ export default function Play() {
     }, []);
 
     async function startNewGame() {
-        resetGame();
-        const member = {
-            uid: auth.currentUser?.uid,
-            piece: Math.random() < 0.5 ? 'b' : 'w',
-            name: auth.currentUser?.displayName,
-            creator: true
+        try {
+            const piece = await startOnlineGame(auth, db);
+            setPerspective(piece);
+        } catch (error) {
+            console.error('Error starting new game:', error);
         }
-        const game = {
-            status: 'waiting',
-            members: [member],
-            board: gameSubject.getValue().fen,
-            history: gameSubject.getValue().history,
-        };
-        setPerspective(member.piece as 'w' | 'b');
-
-        const gamesCollection = collection(db, 'games');
-        addDoc(gamesCollection, game)
-            .then(docRef => {
-                console.log('Game created with ID:', docRef.id);
-            })
-            .catch((error) => {
-                console.error('Error creating game:', error);
-        });
     }
 
     return (
