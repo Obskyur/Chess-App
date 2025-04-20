@@ -15,6 +15,7 @@ export default function Play() {
     const [isGameOver, setIsGameOver] = useState(false);
     const [result, setResult] = useState<string | null>(null);
     const [moves, setMoves] = useState<string[]>([]);
+    const [perspective, setPerspective] = useState<'w' | 'b'>('w');
     
     useEffect(() => {
         const subscription = gameSubject.subscribe(game => {
@@ -27,7 +28,7 @@ export default function Play() {
         return () => subscription.unsubscribe();;
     }, []);
 
-    async function startOnlineGame() {
+    async function startNewGame() {
         resetGame();
         const member = {
             uid: auth.currentUser?.uid,
@@ -41,6 +42,7 @@ export default function Play() {
             board: gameSubject.getValue().fen,
             history: gameSubject.getValue().history,
         };
+        setPerspective(member.piece as 'w' | 'b');
 
         const gamesCollection = collection(db, 'games');
         addDoc(gamesCollection, game)
@@ -59,13 +61,13 @@ export default function Play() {
                     <div className="absolute top-0 left-0 w-full h-full bg-black/50 flex items-center justify-center z-10 pointer-events-auto">
                         <div className="bg-white p-4 rounded shadow-lg text-center pointer-events-auto">
                             <h2 className="text-xl font-bold text-accent">{result}</h2>
-                            <button className="mt-4 px-4 py-2 bg-blue-500 text-white rounded cursor-pointer" onClick={resetGame}>Play Again</button>
+                            <button className="mt-4 px-4 py-2 bg-blue-500 text-white rounded cursor-pointer" onClick={startNewGame}>Play Again</button>
                         </div>
                     </div>
                 )}
                 <div className="flex flex-col justify-center items-center w-full h-full">
-                    <button className="top-4 left-4 px-4 py-2 bg-blue-500 text-white rounded cursor-pointer" onClick={startOnlineGame}>Start Online Game</button>
-                    <ChessBoard board={board} />
+                    <button className="top-4 left-4 px-4 py-2 bg-blue-500 text-white rounded cursor-pointer" onClick={startNewGame}>Start Online Game</button>
+                    <ChessBoard board={board} perspective={perspective} />
                 </div>
                 <MovesBar moves={moves} />
             </div>
