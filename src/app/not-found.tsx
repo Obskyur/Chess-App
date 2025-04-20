@@ -11,7 +11,7 @@ export default function NotFound() {
       </div>
       
       <p className="mb-6 text-gray-600 max-w-md">
-        Looks like this move led to a dead end. The page you're looking for has been captured or never existed.
+        Looks like this move led to a dead end. The page you&#39;re looking for has been captured or never existed.
       </p>
       
       <Link 

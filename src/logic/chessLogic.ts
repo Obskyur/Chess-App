@@ -26,6 +26,13 @@ interface GameState {
   pendingPromo: PendingPromotion | null;
 }
 
+export interface GameMember {
+  uid: string | undefined;
+  piece: 'w' | 'b';
+  name: string | null | undefined;
+  creator: boolean;
+}
+
 class ChessGameManager {
   private chess: Chess;
   private gameSubject: BehaviorSubject<GameState>;
@@ -55,7 +62,7 @@ class ChessGameManager {
 
   public async startOnlineGame(auth: Auth, db: Firestore): Promise<'w' | 'b'> {
     this.startNewGame();
-    const member = {
+    const member: GameMember = {
       uid: auth.currentUser?.uid,
       piece: Math.random() < 0.5 ? 'b' : 'w',
       name: auth.currentUser?.displayName,
@@ -67,6 +74,7 @@ class ChessGameManager {
       members: [member],
       board: this.gameSubject.getValue().fen,
       history: this.gameSubject.getValue().history,
+      createdAt: new Date(),
     };
 
     try {

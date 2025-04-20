@@ -10,7 +10,7 @@ interface AuthenticatorProps {
 }
 
 export default function AuthWrapper({ children }: AuthenticatorProps) {
-  const [user, loading, error] = useAuthState(auth);
+  const [user, loading] = useAuthState(auth);
 
   if (loading) {
     return (

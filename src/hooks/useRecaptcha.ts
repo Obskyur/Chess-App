@@ -2,6 +2,13 @@ import { useEffect } from 'react'
 import { auth } from "@/lib/firebase"
 import { RecaptchaVerifier } from "firebase/auth"
 
+// Extend Window interface to include recaptchaVerifier
+declare global {
+  interface Window {
+    recaptchaVerifier: RecaptchaVerifier | null;
+  }
+}
+
 export function useRecaptcha(containerId: string) {
   useEffect(() => {
     let verifier: RecaptchaVerifier | null = null;

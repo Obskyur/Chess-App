@@ -2,7 +2,7 @@
 
 import { BoardSquareType } from '../../types/BoardSquareType';
 import { useDrop } from 'react-dnd';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Square from '@/app/components/ui/Square';
 import Piece from './Piece';
 import { handleMove } from '@/logic/chessLogic';
@@ -11,8 +11,11 @@ import Promote from './Promote';
 
 export default function BoardSquare({ piece, isWhite, pos }: { piece: BoardSquareType, isWhite: boolean, pos: string }) {
   const [promo, setPromo] = useState<{ from: string; to: string; color: string } | null>(null);
+  
+  // Create a ref
+  const ref = useRef<HTMLDivElement>(null);
 
-  const [ , drop ] = useDrop({
+  const [, drop] = useDrop({
     accept: 'piece',
     drop: (item: { piece: BoardSquareType }) => {
       const fromPos = item!.piece!.square;
@@ -23,6 +26,9 @@ export default function BoardSquare({ piece, isWhite, pos }: { piece: BoardSquar
       canDrop: monitor.canDrop(),
     }),
   });
+
+  // Connect the drop functionality to our ref
+  drop(ref);
 
   useEffect(() => {
     const subscribe = gameSubject.subscribe(({ pendingPromo }) => {
@@ -37,7 +43,7 @@ export default function BoardSquare({ piece, isWhite, pos }: { piece: BoardSquar
   })
 
   return ( 
-    <div className="w-full h-full" ref={drop}>
+    <div className="w-full h-full" ref={ref}>
       <Square isWhite={isWhite}>
         {promo ? (<Promote promo={promo} />) : piece ? (<Piece piece={piece} />) : null}
       </Square>

@@ -1,9 +1,16 @@
 import { useState } from "react"
 import { auth } from "@/lib/firebase"
-import { signInWithPhoneNumber, PhoneAuthProvider, signInWithCredential, updateProfile } from "firebase/auth"
+import { signInWithPhoneNumber, PhoneAuthProvider, signInWithCredential, RecaptchaVerifier, updateProfile } from "firebase/auth"
 import { useRecaptcha } from "@/hooks/useRecaptcha"
 import PhoneNumberForm from "@/app/components/PhoneNumberForm"
 import VerificationForm from "@/app/components/VerificationForm"
+
+// Add type declaration for window.recaptchaVerifier
+declare global {
+  interface Window {
+    recaptchaVerifier: RecaptchaVerifier | null;
+  }
+}
 
 interface AuthState {
   phoneNumber: string
@@ -58,6 +65,10 @@ export default function AuthForm() {
     }
 
     await executeAuthAction(async () => {
+      if (!window.recaptchaVerifier) {
+        throw new Error("reCAPTCHA verifier not initialized");
+      }
+      
       const result = await signInWithPhoneNumber(
         auth, 
         authState.phoneNumber,
@@ -80,7 +91,7 @@ export default function AuthForm() {
       const userCredential = await signInWithCredential(auth, credential)
       
       if (userCredential.user && authState.displayName) {
-        if (userCredential.user && authState.displayName) {
+        if (authState.displayName) {
           await updateProfile(userCredential.user, {
             displayName: authState.displayName
           })
