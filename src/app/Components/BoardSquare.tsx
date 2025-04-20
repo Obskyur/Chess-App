@@ -39,7 +39,7 @@ export default function BoardSquare({ piece, isWhite, pos }: { piece: BoardSquar
   return ( 
     <div className="w-full h-full" ref={drop}>
       <Square isWhite={isWhite}>
-        {promo ? (<Promote promo={promo} />) : piece ? (<Piece piece={piece} pos={pos} />) : null}
+        {promo ? (<Promote promo={promo} />) : piece ? (<Piece piece={piece} />) : null}
       </Square>
     </div>
   );

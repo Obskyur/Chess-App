@@ -29,8 +29,9 @@ export default function Play() {
 
     async function startNewGame() {
         try {
-            const piece = await startOnlineGame(auth, db);
-            setPerspective(piece);
+            await startOnlineGame(auth, db)
+                .then(userColor => setPerspective(userColor))
+                .catch(error => console.error('Error starting online game:', error));
         } catch (error) {
             console.error('Error starting new game:', error);
         }

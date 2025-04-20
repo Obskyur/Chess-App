@@ -1,6 +1,6 @@
 import { Chess, Square, PieceSymbol, Color } from 'chess.js';
 import { BehaviorSubject } from 'rxjs';
-import { Firestore, DocumentReference, DocumentData, collection, addDoc } from 'firebase/firestore';
+import { Firestore, DocumentReference, DocumentData, collection, addDoc, updateDoc } from 'firebase/firestore';
 import { Auth } from 'firebase/auth';
 
 interface ChessMove {
@@ -41,7 +41,6 @@ class ChessGameManager {
 
   public startNewGame(): void {
     this.chess.reset();
-    this.updateGameState();
   }
 
   public async startOnlineGame(auth: Auth, db: Firestore): Promise<'w' | 'b'> {
@@ -69,13 +68,12 @@ class ChessGameManager {
       console.error('Error creating game:', error);
       throw error;
     }
+    this.updateGameState();
     return member.piece as 'w' | 'b';
   }
 
   public attemptMove(from: string, to: string): void {
     const pendingPromotion = this.checkForPawnPromotion(from, to);
-
-    console.log('Move:', from, to);
     
     if (pendingPromotion) {
       this.updateGameState(pendingPromotion);
@@ -160,7 +158,7 @@ class ChessGameManager {
     };
   }
 
-  private updateGameState(pendingPromo: PendingPromotion | null = null): void {
+  private async updateGameState(pendingPromo: PendingPromotion | null = null): Promise<void> {
     const newGameState: GameState = {
       board: this.chess.board(),
       gameOver: this.chess.isGameOver(),
@@ -171,7 +169,24 @@ class ChessGameManager {
       pendingPromo,
     };
 
+    // Save to local storage
     this.saveGameToStorage(this.chess.fen());
+    
+    // Update Firestore if this is an online game
+    if (this.dbGameRef) {
+      try {
+        await updateDoc(this.dbGameRef, {
+          board: newGameState.fen,
+          history: newGameState.history,
+          status: newGameState.gameOver ? 'finished' : 'ongoing',
+          result: newGameState.result
+        });
+      } catch (error) {
+        console.error('Error updating game in Firestore:', error);
+      }
+    }
+
+    // Update local state
     this.gameSubject.next(newGameState);
   }
 
@@ -208,4 +223,4 @@ export const resetGame = () => chessManager.startNewGame();
 export const handleMove = (from: string, to: string) => chessManager.attemptMove(from, to);
 export const move = (from: string, to: string, promotion?: string) => 
   chessManager.executeMove({ from, to, promotion });
-export const startOnlineGame = (auth: Auth, db: Firestore) => chessManager.startOnlineGame(auth, db);
+export const startOnlineGame = async (auth: Auth, db: Firestore) => await chessManager.startOnlineGame(auth, db);
