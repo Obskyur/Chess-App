@@ -1,7 +1,8 @@
 import { Chess, Square, PieceSymbol, Color } from 'chess.js';
 import { BehaviorSubject } from 'rxjs';
-import { Firestore, DocumentReference, DocumentData, collection, addDoc, updateDoc } from 'firebase/firestore';
+import { Firestore, DocumentReference, DocumentData, collection, addDoc, updateDoc, query, where, limit, getDocs } from 'firebase/firestore';
 import { Auth } from 'firebase/auth';
+import { db } from '@/lib/firebase';
 
 interface ChessMove {
   from: string;
@@ -32,7 +33,16 @@ class ChessGameManager {
 
   constructor() {
     this.chess = new Chess();
-    this.gameSubject = new BehaviorSubject<GameState>(this.createInitialGameState());
+    this.gameSubject = new BehaviorSubject<GameState>({
+      board: this.chess.board(),
+      gameOver: false,
+      result: null,
+      gameState: 'white',
+      fen: this.chess.fen(),
+      history: this.chess.history(),
+      pendingPromo: null,
+    });
+    this.createInitialGameState();
   }
 
   public getGameSubject(): BehaviorSubject<GameState> {
@@ -121,7 +131,40 @@ class ChessGameManager {
     return null;
   }
 
-  private createInitialGameState(): GameState {
+  private async createInitialGameState(): Promise<GameState> {
+    if (db) {
+      try {
+        const gamesRef = collection(db, 'games');
+        const q = query(
+          gamesRef,
+          where('status', 'in', ['waiting', 'ongoing']),
+          limit(1)
+        );
+        
+        const querySnapshot = await getDocs(q);
+        
+        if (!querySnapshot.empty) {
+          const gameDoc = querySnapshot.docs[0];
+          this.dbGameRef = gameDoc.ref;
+          const gameData = gameDoc.data();
+          
+          // Load the game state from Firestore
+          this.chess.load(gameData.board);
+          return {
+            board: this.chess.board(),
+            gameOver: this.chess.isGameOver(),
+            result: gameData.result || null,
+            gameState: this.chess.turn(),
+            fen: gameData.board,
+            history: gameData.history || [],
+            pendingPromo: null,
+          };
+        }
+      } catch (error) {
+        console.error('Error loading game from Firestore:', error);
+      }
+    }
+    
     const savedGame = this.loadGameFromStorage();
 
     if (savedGame) {
